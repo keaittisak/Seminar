@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>หน้าสรุปคนและตำแหน่ง & Report CSV - ระบบจัดสรรตำแหน่งบุคลากร</title>
+    <!-- Google Fonts (Prompt) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm py-3 d-print-none">
+        <div class="container">
+            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="index.html">
+                <i class="bi bi-diagram-3-fill fs-4"></i>
+                <span>ระบบจัดสรรตำแหน่งบุคลากร</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <!-- เมนูสลับหน้า -->
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4 gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link fw-medium px-3 rounded-pill text-white" href="index.html">
+                            <i class="bi bi-sliders me-1"></i> หน้าจัดการและจับคู่ตำแหน่ง
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active fw-medium px-3 rounded-pill bg-white text-primary shadow-sm" aria-current="page" href="summary.html">
+                            <i class="bi bi-bar-chart-steps me-1"></i> หน้าสรุปคนและตำแหน่ง (CSV)
+                        </a>
+                    </li>
+                </ul>
+                <div class="d-flex flex-wrap gap-2">
+                    <!-- ปุ่ม Report CSV แบบเลือกหมวดได้ -->
+                    <div class="dropdown">
+                        <button class="btn btn-success btn-sm fw-medium dropdown-toggle shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-file-earmark-spreadsheet-fill me-1"></i> ดาวน์โหลด Report CSV
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                            <li><h6 class="dropdown-header">เลือกรูปแบบไฟล์ CSV</h6></li>
+                            <li>
+                                <button class="dropdown-item" type="button" data-export-csv="all">
+                                    <i class="bi bi-table text-primary me-2"></i>1. สรุปรายชื่อทั้งหมด (บริหาร + ทำงานจริง)
+                                </button>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <button class="dropdown-item" type="button" data-export-csv="executive">
+                                    <i class="bi bi-award-fill text-primary me-2"></i>2. Report 2.1 รายชื่อบริหาร (รวม)
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item ps-4 small" type="button" data-export-csv="executive-directorate">
+                                    <i class="bi bi-dot me-1"></i>2.1 รายชื่อบริหาร - กองอำนวยการ
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item ps-4 small" type="button" data-export-csv="executive-participant">
+                                    <i class="bi bi-dot me-1"></i>2.1 รายชื่อบริหาร - ผู้เข้าร่วมสัมมนา
+                                </button>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <button class="dropdown-item" type="button" data-export-csv="actual">
+                                    <i class="bi bi-person-workspace text-success me-2"></i>3. Report 2.2 รายชื่อทำงานจริง (รวม)
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item ps-4 small" type="button" data-export-csv="actual-directorate">
+                                    <i class="bi bi-dot me-1"></i>2.2 รายชื่อทำงานจริง - กองอำนวยการ
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item ps-4 small" type="button" data-export-csv="actual-participant">
+                                    <i class="bi bi-dot me-1"></i>2.2 รายชื่อทำงานจริง - ผู้เข้าร่วมสัมมนา
+                                </button>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <button class="dropdown-item" type="button" data-export-csv="by-position">
+                                    <i class="bi bi-tags-fill text-warning me-2"></i>4. สรุปตามตำแหน่งงาน (ตำแหน่ง → คน)
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <button class="btn btn-light btn-sm fw-medium" id="btnPrintSummary">
+                        <i class="bi bi-printer-fill me-1"></i> พิมพ์รายงาน
+                    </button>
+                    <a href="index.html" class="btn btn-outline-light btn-sm fw-medium">
+                        <i class="bi bi-pencil-square me-1"></i> กลับไปแก้ไขข้อมูล
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container my-4">
+
+        <!-- Header & Quick CSV Buttons -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+            <div>
+                <h3 class="fw-bold text-primary mb-1">
+                    <i class="bi bi-clipboard2-data-fill me-2"></i>หน้าสรุปข้อมูลคนและตำแหน่งงาน (Report &amp; CSV)
+                </h3>
+                <p class="text-muted mb-0">
+                    แยกตาม <strong>2.1 รายชื่อบริหาร</strong> และ <strong>2.2 รายชื่อทำงานจริง</strong> (กองอำนวยการ / ผู้เข้าร่วมสัมมนา)
+                </p>
+            </div>
+            <div class="d-flex flex-wrap align-items-center gap-2 d-print-none">
+                <div class="input-group" style="width: 260px;">
+                    <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" id="summarySearchInput" class="form-control" placeholder="ค้นหาชื่อคน หรือตำแหน่ง...">
+                </div>
+                <button class="btn btn-success fw-medium" type="button" data-export-csv="all">
+                    <i class="bi bi-filetype-csv me-1"></i> Export CSV ทั้งหมด
+                </button>
+            </div>
+        </div>
+
+        <!-- Row 1: Dashboard KPI Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm h-100 stat-card border-start border-primary border-4">
+                    <div class="card-body d-flex align-items-center justify-content-between p-4">
+                        <div>
+                            <div class="text-muted small fw-medium mb-1">2.1 รายชื่อบริหาร</div>
+                            <h2 class="fw-bold text-primary mb-0" id="statExecTotal">0</h2>
+                            <small class="text-muted" id="statExecSubText">กองอำนวยการ 0 | ผู้เข้าร่วม 0</small>
+                        </div>
+                        <div class="stat-icon bg-primary-subtle text-primary">
+                            <i class="bi bi-award-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm h-100 stat-card border-start border-success border-4">
+                    <div class="card-body d-flex align-items-center justify-content-between p-4">
+                        <div>
+                            <div class="text-muted small fw-medium mb-1">2.2 รายชื่อทำงานจริง</div>
+                            <h2 class="fw-bold text-success mb-0" id="statActualTotal">0</h2>
+                            <small class="text-muted" id="statActualSubText">กองอำนวยการ 0 | ผู้เข้าร่วม 0</small>
+                        </div>
+                        <div class="stat-icon bg-success-subtle text-success">
+                            <i class="bi bi-person-workspace"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm h-100 stat-card border-start border-info border-4">
+                    <div class="card-body d-flex align-items-center justify-content-between p-4">
+                        <div>
+                            <div class="text-muted small fw-medium mb-1">ตำแหน่งงานทั้งหมด</div>
+                            <h2 class="fw-bold text-info mb-0" id="statTotalPositions">0</h2>
+                            <small class="text-muted" id="statMultiPosText">ถือหลายตำแหน่ง 0 คน</small>
+                        </div>
+                        <div class="stat-icon bg-info-subtle text-info">
+                            <i class="bi bi-briefcase-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm h-100 stat-card border-start border-warning border-4">
+                    <div class="card-body d-flex align-items-center justify-content-between p-4">
+                        <div>
+                            <div class="text-muted small fw-medium mb-1">การจับคู่ตำแหน่งรวม</div>
+                            <h2 class="fw-bold text-warning mb-0" id="statTotalAssignments">0</h2>
+                            <small class="text-muted" id="statTotalPeopleText">จากทั้งหมด 0 รายชื่อ</small>
+                        </div>
+                        <div class="stat-icon bg-warning-subtle text-warning">
+                            <i class="bi bi-diagram-2-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs สลับมุมมองสรุป -->
+        <ul class="nav nav-pills mb-4 gap-2 d-print-none" id="summaryViewTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-medium px-3" data-bs-toggle="pill" data-bs-target="#pane-exec-actual" type="button" role="tab">
+                    <i class="bi bi-layout-split me-1"></i> สรุปแยก 2.1 บริหาร &amp; 2.2 ทำงานจริง
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-medium px-3" data-bs-toggle="pill" data-bs-target="#pane-by-person" type="button" role="tab">
+                    <i class="bi bi-person-lines-fill me-1"></i> ตารางสรุปรวมทุกคน
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-medium px-3" data-bs-toggle="pill" data-bs-target="#pane-by-position" type="button" role="tab">
+                    <i class="bi bi-tags-fill me-1"></i> สรุปตามตำแหน่ง (ตำแหน่ง → คน)
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- แท็บที่ 1: สรุปแยก 2.1 รายชื่อบริหาร และ 2.2 รายชื่อทำงานจริง -->
+            <div class="tab-pane fade show active" id="pane-exec-actual" role="tabpanel">
+                <!-- ส่วนที่ 2.1: รายชื่อบริหาร -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3 px-4 d-flex flex-wrap justify-content-between align-items-center gap-2 border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary rounded-pill px-3 py-2 fs-6">
+                                <i class="bi bi-award-fill me-1"></i>2.1 รายชื่อบริหาร
+                            </span>
+                            <span class="text-muted small">แยกเป็น กองอำนวยการ และ ผู้เข้าร่วมสัมมนา</span>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary btn-sm fw-medium d-print-none" data-export-csv="executive">
+                            <i class="bi bi-filetype-csv me-1"></i> Report 2.1 รายชื่อบริหาร (CSV)
+                        </button>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-4">
+                            <!-- 2.1 กองอำนวยการ -->
+                            <div class="col-lg-6">
+                                <div class="border rounded-3 overflow-hidden h-100">
+                                    <div class="bg-danger-subtle text-danger-emphasis px-3 py-2 fw-bold d-flex justify-content-between align-items-center">
+                                        <span><i class="bi bi-building-fill-gear me-2"></i>กองอำนวยการ (บริหาร)</span>
+                                        <button type="button" class="btn btn-light btn-sm py-0 px-2 small d-print-none" data-export-csv="executive-directorate" title="Export CSV">
+                                            <i class="bi bi-download me-1"></i>CSV
+                                        </button>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover align-middle mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="ps-3" style="width: 45px;">#</th>
+                                                    <th>ชื่อ - นามสกุล</th>
+                                                    <th>ตำแหน่ง</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tbodyExecDirectorate"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 2.1 ผู้เข้าร่วมสัมมนา -->
+                            <div class="col-lg-6">
+                                <div class="border rounded-3 overflow-hidden h-100">
+                                    <div class="bg-info-subtle text-info-emphasis px-3 py-2 fw-bold d-flex justify-content-between align-items-center">
+                                        <span><i class="bi bi-people-fill me-2"></i>ผู้เข้าร่วมสัมมนา (บริหาร)</span>
+                                        <button type="button" class="btn btn-light btn-sm py-0 px-2 small d-print-none" data-export-csv="executive-participant" title="Export CSV">
+                                            <i class="bi bi-download me-1"></i>CSV
+                                        </button>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover align-middle mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="ps-3" style="width: 45px;">#</th>
+                                                    <th>ชื่อ - นามสกุล</th>
+                                                    <th>ตำแหน่ง</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tbodyExecParticipant"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ส่วนที่ 2.2: รายชื่อทำงานจริง -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3 px-4 d-flex flex-wrap justify-content-between align-items-center gap-2 border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-success rounded-pill px-3 py-2 fs-6">
+                                <i class="bi bi-person-workspace me-1"></i>2.2 รายชื่อทำงานจริง
+                            </span>
+                            <span class="text-muted small">แยกเป็น กองอำนวยการ และ ผู้เข้าร่วมสัมมนา</span>
+                        </div>
+                        <button type="button" class="btn btn-outline-success btn-sm fw-medium d-print-none" data-export-csv="actual">
+                            <i class="bi bi-filetype-csv me-1"></i> Report 2.2 รายชื่อทำงานจริง (CSV)
+                        </button>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-4">
+                            <!-- 2.2 กองอำนวยการ -->
+                            <div class="col-lg-6">
+                                <div class="border rounded-3 overflow-hidden h-100">
+                                    <div class="bg-danger-subtle text-danger-emphasis px-3 py-2 fw-bold d-flex justify-content-between align-items-center">
+                                        <span><i class="bi bi-building-fill-gear me-2"></i>กองอำนวยการ (ทำงานจริง)</span>
+                                        <button type="button" class="btn btn-light btn-sm py-0 px-2 small d-print-none" data-export-csv="actual-directorate" title="Export CSV">
+                                            <i class="bi bi-download me-1"></i>CSV
+                                        </button>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover align-middle mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="ps-3" style="width: 45px;">#</th>
+                                                    <th>ชื่อ - นามสกุล</th>
+                                                    <th>ตำแหน่ง</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tbodyActualDirectorate"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 2.2 ผู้เข้าร่วมสัมมนา -->
+                            <div class="col-lg-6">
+                                <div class="border rounded-3 overflow-hidden h-100">
+                                    <div class="bg-info-subtle text-info-emphasis px-3 py-2 fw-bold d-flex justify-content-between align-items-center">
+                                        <span><i class="bi bi-people-fill me-2"></i>ผู้เข้าร่วมสัมมนา (ทำงานจริง)</span>
+                                        <button type="button" class="btn btn-light btn-sm py-0 px-2 small d-print-none" data-export-csv="actual-participant" title="Export CSV">
+                                            <i class="bi bi-download me-1"></i>CSV
+                                        </button>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover align-middle mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="ps-3" style="width: 45px;">#</th>
+                                                    <th>ชื่อ - นามสกุล</th>
+                                                    <th>ตำแหน่ง</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tbodyActualParticipant"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- แท็บที่ 2: ตารางสรุปรวมทุกคน -->
+            <div class="tab-pane fade" id="pane-by-person" role="tabpanel">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3 px-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <h5 class="fw-bold text-primary mb-0">
+                            <i class="bi bi-person-lines-fill me-2"></i>ตารางสรุปรายชื่อและตำแหน่งทั้งหมด
+                        </h5>
+                        <button type="button" class="btn btn-success btn-sm fw-medium d-print-none" data-export-csv="all">
+                            <i class="bi bi-filetype-csv me-1"></i> Report ตารางนี้เป็น CSV
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4" style="width: 60px;">#</th>
+                                        <th>ชื่อ - นามสกุล</th>
+                                        <th>หมวดรายชื่อ</th>
+                                        <th>กลุ่มย่อย</th>
+                                        <th>ตำแหน่งที่ได้รับ</th>
+                                        <th class="text-center" style="width: 110px;">รวม</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="summaryByPersonTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- แท็บที่ 3: สรุปตามตำแหน่งงาน -->
+            <div class="tab-pane fade" id="pane-by-position" role="tabpanel">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3 px-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <h5 class="fw-bold text-success mb-0">
+                            <i class="bi bi-tags-fill me-2"></i>สรุปข้อมูลแยกตามตำแหน่งงาน (แต่ละตำแหน่งมีใครบ้าง)
+                        </h5>
+                        <button type="button" class="btn btn-success btn-sm fw-medium d-print-none" data-export-csv="by-position">
+                            <i class="bi bi-filetype-csv me-1"></i> Report สรุปตามตำแหน่งเป็น CSV
+                        </button>
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="fullPositionSummaryGrid" class="row g-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap 5.3 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Summary Page JS -->
+    <script src="summary.js"></script>
+</body>
+</html>

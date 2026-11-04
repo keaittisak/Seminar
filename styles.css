@@ -1,0 +1,142 @@
+body {
+    font-family: 'Prompt', sans-serif;
+    background-color: #f4f7fb;
+    color: #2c3e50;
+}
+
+/* ป้ายตำแหน่งที่ลากได้ (Draggable Badge) */
+.position-chip {
+    cursor: grab;
+    user-select: none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 50rem;
+}
+
+.position-chip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.position-chip:active {
+    cursor: grabbing;
+    transform: scale(0.96);
+}
+
+.position-chip.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+}
+
+/* พื้นที่คลังตำแหน่ง */
+.min-pool-height {
+    min-height: 120px;
+    padding: 1rem;
+    background-color: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    border-radius: 0.75rem;
+}
+
+/* การ์ดรายชื่อบุคลากร (Drop Zone) */
+.person-card {
+    transition: all 0.2s ease;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.85rem;
+    background-color: #ffffff;
+}
+
+.person-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+}
+
+/* เอฟเฟกต์เมื่อลากตำแหน่งมาวางเหนือการ์ด */
+.person-card.drag-over {
+    border: 2px dashed #0d6efd;
+    background-color: #eff6ff;
+    transform: scale(1.01);
+}
+
+/* พื้นที่แสดงตำแหน่งภายในการ์ดคน */
+.assigned-positions-zone {
+    min-height: 64px;
+    padding: 0.75rem;
+    background-color: #f8fafc;
+    border-radius: 0.6rem;
+    border: 1px dashed #cbd5e1;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.person-card.drag-over .assigned-positions-zone {
+    background-color: #dbeafe;
+    border-color: #3b82f6;
+}
+
+/* Avatar วงกลมแสดงตัวอักษรย่อชื่อ */
+.avatar-circle {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.05rem;
+    background: linear-gradient(135deg, #0d6efd, #3b82f6);
+    color: #fff;
+    flex-shrink: 0;
+}
+
+/* ปุ่มลบเล็กๆ ใน Badge */
+.chip-remove-btn {
+    background: rgba(255, 255, 255, 0.25);
+    border: none;
+    color: inherit;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    padding: 0;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.chip-remove-btn:hover {
+    background: rgba(0, 0, 0, 0.25);
+}
+
+/* ขนาด Avatar เล็กในตารางสรุป */
+.avatar-circle.avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: 0.85rem;
+}
+
+/* การ์ดสถิติในหน้าสรุป (Summary Dashboard) */
+.stat-card {
+    border-radius: 0.85rem;
+    transition: transform 0.15s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+}
+

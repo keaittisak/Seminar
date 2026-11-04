@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดการรายชื่อและตำแหน่งงาน (Position Matcher)</title>
+    <!-- Google Fonts (Prompt) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm py-3">
+        <div class="container">
+            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="index.html">
+                <i class="bi bi-diagram-3-fill fs-4"></i>
+                <span>ระบบจัดสรรตำแหน่งบุคลากร</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <!-- เมนูสลับหน้า -->
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4 gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link active fw-medium px-3 rounded-pill bg-white text-primary shadow-sm" aria-current="page" href="index.html">
+                            <i class="bi bi-sliders me-1"></i> หน้าจัดการและจับคู่ตำแหน่ง
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-medium px-3 rounded-pill text-white" href="summary.html">
+                            <i class="bi bi-bar-chart-steps me-1"></i> หน้าสรุปคนและตำแหน่ง (CSV)
+                        </a>
+                    </li>
+                </ul>
+                <div class="d-flex flex-wrap gap-2">
+                    <div class="dropdown">
+                        <button class="btn btn-success btn-sm fw-medium dropdown-toggle shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-file-earmark-spreadsheet-fill me-1"></i> Report CSV
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                            <li><h6 class="dropdown-header">เลือกประเภทรายงาน CSV</h6></li>
+                            <li>
+                                <button class="dropdown-item" type="button" id="btnExportAllCsv">
+                                    <i class="bi bi-table text-primary me-2"></i>Report ข้อมูลทั้งหมด (บริหาร + ทำงานจริง)
+                                </button>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <button class="dropdown-item" type="button" id="btnExportExecCsv">
+                                    <i class="bi bi-award-fill text-indigo me-2"></i>Report 2.1 รายชื่อบริหาร (CSV)
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item" type="button" id="btnExportActualCsv">
+                                    <i class="bi bi-person-workspace text-success me-2"></i>Report 2.2 รายชื่อทำงานจริง (CSV)
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-light btn-sm fw-medium" id="btnLoadSample" title="โหลดข้อมูลตัวอย่าง">
+                        <i class="bi bi-magic me-1"></i> ข้อมูลตัวอย่าง
+                    </button>
+                    <button class="btn btn-outline-light btn-sm" id="btnResetAll" title="ล้างข้อมูลทั้งหมด">
+                        <i class="bi bi-trash3 me-1"></i> ล้างทั้งหมด
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container my-4">
+
+        <!-- Instruction Alert -->
+        <div class="alert alert-info border-0 shadow-sm d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4" role="alert">
+            <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-hand-index-thumb-fill fs-3 text-primary"></i>
+                <div>
+                    <strong>วิธีใช้งาน:</strong> เพิ่มรายชื่อในหมวด <strong>รายชื่อบริหาร (2.1)</strong> หรือ <strong>รายชื่อทำงานจริง (2.2)</strong> (แยกเป็น <em>กองอำนวยการ</em> และ <em>ผู้เข้าร่วมสัมมนา</em>) 
+                    หากกรอกรายชื่อทำงานจริงที่ชื่อตรงกับรายชื่อบริหาร ระบบจะดึงข้อมูลและตำแหน่งมาใส่ให้อัตโนมัติ!
+                </div>
+            </div>
+            <a href="summary.html" class="btn btn-primary btn-sm fw-medium px-3 rounded-pill shadow-sm">
+                <i class="bi bi-clipboard-data me-1"></i> ไปที่หน้าสรุป &amp; Report CSV <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <!-- Row 1: Forms for Adding Person & Position -->
+        <div class="row g-4 mb-4">
+            <!-- Form 1: กรอกชื่อ-นามสกุล และเลือกประเภท (บริหาร / ทำงานจริง) -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <h5 class="card-title fw-bold text-primary mb-0">
+                            <i class="bi bi-person-plus-fill me-2"></i>1. เพิ่มรายชื่อบุคลากร
+                        </h5>
+                        <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2">
+                            รองรับดึงข้อมูลอัตโนมัติจากรายชื่อบริหาร
+                        </span>
+                    </div>
+                    <div class="card-body px-4 pb-4">
+                        <form id="personForm" class="row g-3">
+                            <!-- เลือกหมวดหลัก: 2.1 รายชื่อบริหาร หรือ 2.2 รายชื่อทำงานจริง -->
+                            <div class="col-sm-6">
+                                <label for="listType" class="form-label fw-medium">หมวดรายชื่อ <span class="text-danger">*</span></label>
+                                <select class="form-select border-primary-subtle" id="listType" required>
+                                    <option value="executive">2.1 รายชื่อบริหาร</option>
+                                    <option value="actual">2.2 รายชื่อทำงานจริง</option>
+                                </select>
+                            </div>
+
+                            <!-- เลือกกลุ่มย่อย: กองอำนวยการ หรือ ผู้เข้าร่วมสัมมนา -->
+                            <div class="col-sm-6">
+                                <label for="subGroup" class="form-label fw-medium">กลุ่มย่อย <span class="text-danger">*</span></label>
+                                <select class="form-select" id="subGroup" required>
+                                    <option value="directorate">กองอำนวยการ</option>
+                                    <option value="participant">ผู้เข้าร่วมสัมมนา</option>
+                                </select>
+                            </div>
+
+                            <!-- กล่องตัวช่วยดึงข้อมูลจาก 2.1 รายชื่อบริหาร (แสดงเมื่อเลือก 2.2 รายชื่อทำงานจริง) -->
+                            <div class="col-12 d-none" id="pullFromExecBox">
+                                <div class="p-3 rounded-3 bg-success-subtle border border-success-subtle">
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                                        <label for="selectExecPerson" class="form-label fw-semibold text-success-emphasis mb-0 small">
+                                            <i class="bi bi-lightning-charge-fill me-1"></i>ดึงข้อมูลจาก 2.1 รายชื่อบริหาร (หรือพิมพ์ชื่อเดียวกันด้านล่าง ระบบจะดึงให้อัตโนมัติ):
+                                        </label>
+                                        <button type="button" class="btn btn-success btn-sm py-1 px-2" id="btnCopyAllExecToActual">
+                                            <i class="bi bi-people-fill me-1"></i> ดึงรายชื่อบริหารทั้งหมดมาใส่ทำงานจริง
+                                        </button>
+                                    </div>
+                                    <select class="form-select form-select-sm" id="selectExecPerson">
+                                        <option value="">-- เลือกรายชื่อจากหมวดบริหารเพื่อดึงข้อมูลมาใส่ทันที --</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <label for="firstName" class="form-label fw-medium">ชื่อ <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="firstName" list="execFirstNamesList" placeholder="เช่น สมชาย" required autocomplete="off">
+                                <datalist id="execFirstNamesList"></datalist>
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="lastName" class="form-label fw-medium">นามสกุล <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="lastName" placeholder="เช่น ใจดี" required autocomplete="off">
+                            </div>
+
+                            <!-- แจ้งเตือนเมื่อตรวจพบชื่อตรงกับ 2.1 รายชื่อบริหาร -->
+                            <div class="col-12 d-none" id="autoMatchedExecNotice">
+                                <div class="alert alert-success py-2 px-3 mb-0 small d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <i class="bi bi-check-circle-fill me-1"></i>
+                                        <span id="autoMatchedExecText">พบชื่อตรงกับรายชื่อบริหาร ระบบจะดึงตำแหน่งมาให้อัตโนมัติ</span>
+                                    </div>
+                                    <div class="form-check form-switch mb-0">
+                                        <input class="form-check-input" type="checkbox" id="copyPositionsSwitch" checked>
+                                        <label class="form-check-label small" for="copyPositionsSwitch">ดึงตำแหน่งมาด้วย</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary w-100 fw-medium">
+                                    <i class="bi bi-plus-circle me-1"></i> บันทึกรายชื่อ
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form 2: กรอกตำแหน่ง -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                        <h5 class="card-title fw-bold text-success mb-0">
+                            <i class="bi bi-briefcase-fill me-2"></i>2. เพิ่มตำแหน่งงาน
+                        </h5>
+                    </div>
+                    <div class="card-body px-4 pb-4 d-flex flex-column justify-content-between">
+                        <form id="positionForm" class="row g-3">
+                            <div class="col-12">
+                                <label for="positionName" class="form-label fw-medium">ชื่อตำแหน่ง <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="positionName" placeholder="เช่น ผู้อำนวยการโครงการ, วิทยากร, ประสานงาน" required>
+                            </div>
+                            <div class="col-12">
+                                <label for="positionColor" class="form-label fw-medium">สีป้ายตำแหน่ง</label>
+                                <select class="form-select" id="positionColor">
+                                    <option value="primary">น้ำเงิน (Primary)</option>
+                                    <option value="success">เขียว (Success)</option>
+                                    <option value="info">ฟ้า (Info)</option>
+                                    <option value="warning">เหลือง (Warning)</option>
+                                    <option value="danger">แดง (Danger)</option>
+                                    <option value="dark">ดำ (Dark)</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-success w-100 fw-medium">
+                                    <i class="bi bi-plus-circle me-1"></i> บันทึกตำแหน่ง
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: Workspace (Positions Pool & People Cards) -->
+        <div class="row g-4">
+            <!-- Left Column: คลังตำแหน่งงาน (Draggable Pool) -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm sticky-lg-top" style="top: 1.5rem; z-index: 10;">
+                    <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0">
+                            <i class="bi bi-tags-fill text-success me-2"></i>คลังตำแหน่งงาน
+                        </h5>
+                        <span class="badge bg-success rounded-pill" id="positionCountBadge">0 ตำแหน่ง</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <p class="text-muted small mb-3">
+                            <i class="bi bi-arrows-move me-1"></i> ลากป้ายตำแหน่งด้านล่างไปวางใส่การ์ดรายชื่อคนด้านขวาได้เลย (1 คนมีได้หลายตำแหน่ง)
+                        </p>
+                        <div id="positionsPool" class="d-flex flex-wrap gap-2 min-pool-height">
+                            <!-- ป้ายตำแหน่งจะถูกแสดงที่นี่ด้วย JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: รายชื่อบุคลากร แยกตาม 2.1 รายชื่อบริหาร และ 2.2 รายชื่อทำงานจริง -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3 px-4">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                            <h5 class="fw-bold mb-0">
+                                <i class="bi bi-people-fill text-primary me-2"></i>3. รายชื่อบุคลากรและการจัดสรรตำแหน่ง
+                            </h5>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="input-group input-group-sm" style="width: 220px;">
+                                    <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                                    <input type="text" id="searchPersonInput" class="form-control" placeholder="ค้นหาชื่อ หรือตำแหน่ง...">
+                                </div>
+                                <span class="badge bg-primary rounded-pill" id="personCountBadge">0 รายการ</span>
+                            </div>
+                        </div>
+
+                        <!-- แท็บสลับดู 2.1 รายชื่อบริหาร / 2.2 รายชื่อทำงานจริง / ทั้งหมด -->
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <ul class="nav nav-pills nav-fill gap-2" id="listTypeFilterTabs">
+                                <li class="nav-item">
+                                    <button type="button" class="nav-link active btn-sm py-1 px-3" data-filter-type="all">
+                                        ทั้งหมด (<span id="countAllTab">0</span>)
+                                    </button>
+                                </li>
+                                <li class="nav-item">
+                                    <button type="button" class="nav-link btn-sm py-1 px-3" data-filter-type="executive">
+                                        2.1 รายชื่อบริหาร (<span id="countExecTab">0</span>)
+                                    </button>
+                                </li>
+                                <li class="nav-item">
+                                    <button type="button" class="nav-link btn-sm py-1 px-3" data-filter-type="actual">
+                                        2.2 รายชื่อทำงานจริง (<span id="countActualTab">0</span>)
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <!-- ตัวกรองย่อย กองอำนวยการ / ผู้เข้าร่วมสัมมนา -->
+                            <div class="btn-group btn-group-sm" role="group" aria-label="Subgroup filter">
+                                <button type="button" class="btn btn-outline-secondary active" data-filter-subgroup="all">ทุกกลุ่ม</button>
+                                <button type="button" class="btn btn-outline-secondary" data-filter-subgroup="directorate">กองอำนวยการ</button>
+                                <button type="button" class="btn btn-outline-secondary" data-filter-subgroup="participant">ผู้เข้าร่วมสัมมนา</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4" id="peopleSectionsWrapper">
+                        <!-- การ์ดรายชื่อคนแยกตามหมวดหมู่จะถูกแสดงที่นี่ด้วย JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Table Preview Section -->
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-white py-3 px-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <h5 class="fw-bold mb-0">
+                    <i class="bi bi-table text-secondary me-2"></i>ตารางสรุปข้อมูลทั้งหมด
+                </h5>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-success btn-sm fw-medium" id="btnExportTableCsv">
+                        <i class="bi bi-filetype-csv me-1"></i> Report ตารางนี้เป็น CSV
+                    </button>
+                    <a href="summary.html" class="btn btn-outline-primary btn-sm fw-medium">
+                        <i class="bi bi-bar-chart-steps me-1"></i> ดูหน้าสรุปแบบละเอียดทั้งหมด
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4" style="width: 60px;">#</th>
+                                <th>ชื่อ - นามสกุล</th>
+                                <th>หมวดรายชื่อ</th>
+                                <th>กลุ่มย่อย</th>
+                                <th>ตำแหน่งทั้งหมดที่มี</th>
+                                <th class="text-center" style="width: 130px;">จำนวนตำแหน่ง</th>
+                            </tr>
+                        </thead>
+                        <tbody id="summaryTableBody">
+                            <!-- ข้อมูลตารางสรุป -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal สำหรับเลือกตำแหน่งให้บุคลากร (กรณีไม่ได้ลากวาง) -->
+    <div class="modal fade" id="assignPositionModal" tabindex="-1" aria-labelledby="assignPositionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold" id="assignPositionModalLabel">
+                        <i class="bi bi-person-check-fill me-2"></i>กำหนดตำแหน่งให้: <span id="modalPersonName"></span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="text-muted small mb-3">คลิกเลือกตำแหน่งที่ต้องการเพิ่มหรือเอาออก (เลือกได้หลายตำแหน่ง):</p>
+                    <div id="modalPositionsList" class="d-flex flex-column gap-2">
+                        <!-- รายการ Checkbox ตำแหน่ง -->
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast แจ้งเตือน -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="appToast" class="toast align-items-center text-bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="toastMessage">
+                    บันทึกข้อมูลเรียบร้อย
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5.3 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="app.js"></script>
+</body>
+</html>
